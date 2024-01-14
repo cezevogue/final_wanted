@@ -20,6 +20,9 @@ class Purchase
     #[ORM\ManyToOne(inversedBy: 'purchases')]
     private ?Product $product = null;
 
+    #[ORM\ManyToOne(inversedBy: 'purchases')]
+    private ?OrderPurchase $orderPurchase = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -45,6 +48,18 @@ class Purchase
     public function setProduct(?Product $product): static
     {
         $this->product = $product;
+
+        return $this;
+    }
+
+    public function getOrderPurchase(): ?OrderPurchase
+    {
+        return $this->orderPurchase;
+    }
+
+    public function setOrderPurchase(?OrderPurchase $orderPurchase): static
+    {
+        $this->orderPurchase = $orderPurchase;
 
         return $this;
     }

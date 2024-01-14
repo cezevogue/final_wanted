@@ -20,6 +20,12 @@ class Rating
     #[ORM\Column(type: Types::TEXT)]
     private ?string $comment = null;
 
+    #[ORM\ManyToOne(inversedBy: 'ratings')]
+    private ?User $user = null;
+
+    #[ORM\ManyToOne(inversedBy: 'ratings')]
+    private ?Product $product = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -45,6 +51,30 @@ class Rating
     public function setComment(string $comment): static
     {
         $this->comment = $comment;
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): static
+    {
+        $this->user = $user;
+
+        return $this;
+    }
+
+    public function getProduct(): ?Product
+    {
+        return $this->product;
+    }
+
+    public function setProduct(?Product $product): static
+    {
+        $this->product = $product;
 
         return $this;
     }

@@ -19,6 +19,9 @@ class Media
     #[ORM\Column(length: 255)]
     private ?string $src = null;
 
+    #[ORM\ManyToOne(inversedBy: 'medias')]
+    private ?Product $product = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -44,6 +47,18 @@ class Media
     public function setSrc(string $src): static
     {
         $this->src = $src;
+
+        return $this;
+    }
+
+    public function getProduct(): ?Product
+    {
+        return $this->product;
+    }
+
+    public function setProduct(?Product $product): static
+    {
+        $this->product = $product;
 
         return $this;
     }

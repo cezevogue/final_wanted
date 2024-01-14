@@ -22,19 +22,20 @@ class OrderPurchase
     #[ORM\Column(type: Types::SMALLINT, nullable: true)]
     private ?int $status = null;
 
-    #[ORM\ManyToOne(targetEntity: self::class, inversedBy: 'purchases')]
-    private ?self $orderPurchase = null;
 
-    #[ORM\OneToMany(mappedBy: 'orderPurchase', targetEntity: self::class)]
-    private Collection $purchases;
 
     #[ORM\ManyToOne(inversedBy: 'orderPurchases')]
     private ?User $user = null;
+
+    #[ORM\OneToMany(mappedBy: 'orderPurchase', targetEntity: Purchase::class)]
+    private Collection $purchases;
 
     public function __construct()
     {
         $this->purchases = new ArrayCollection();
     }
+
+
 
     public function getId(): ?int
     {
@@ -65,47 +66,7 @@ class OrderPurchase
         return $this;
     }
 
-    public function getOrderPurchase(): ?self
-    {
-        return $this->orderPurchase;
-    }
 
-    public function setOrderPurchase(?self $orderPurchase): static
-    {
-        $this->orderPurchase = $orderPurchase;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, self>
-     */
-    public function getPurchases(): Collection
-    {
-        return $this->purchases;
-    }
-
-    public function addPurchase(self $purchase): static
-    {
-        if (!$this->purchases->contains($purchase)) {
-            $this->purchases->add($purchase);
-            $purchase->setOrderPurchase($this);
-        }
-
-        return $this;
-    }
-
-    public function removePurchase(self $purchase): static
-    {
-        if ($this->purchases->removeElement($purchase)) {
-            // set the owning side to null (unless already changed)
-            if ($purchase->getOrderPurchase() === $this) {
-                $purchase->setOrderPurchase(null);
-            }
-        }
-
-        return $this;
-    }
 
     public function getUser(): ?User
     {
@@ -115,6 +76,36 @@ class OrderPurchase
     public function setUser(?User $user): static
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Purchase>
+     */
+    public function getPurchases(): Collection
+    {
+        return $this->purchases;
+    }
+
+    public function addPurchase(Purchase $purchase): static
+    {
+        if (!$this->purchases->contains($purchase)) {
+            $this->purchases->add($purchase);
+            $purchase->setOrderPurchase($this);
+        }
+
+        return $this;
+    }
+
+    public function removePurchase(Purchase $purchase): static
+    {
+        if ($this->purchases->removeElement($purchase)) {
+            // set the owning side to null (unless already changed)
+            if ($purchase->getOrderPurchase() === $this) {
+                $purchase->setOrderPurchase(null);
+            }
+        }
 
         return $this;
     }
