@@ -1,0 +1,89 @@
+<html lang="fr">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Bienvenue chez Wanted!</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f3f3f3;
+            font-family: Helvetica, Arial, sans-serif;
+        }
+        h1 {
+            border-radius: 5px;
+            border: 2px solid #2671a3;
+            background-color: #000000;
+            color: #ffffff;
+            padding: 30px 0 50px 0;
+            font-weight: normal;
+        }
+        hr {
+            border: none;
+            border-top: 3px solid #264459;
+            margin: 20px;
+        }
+        .container {
+            background-color: #fefefe;
+            width: 580px;
+            margin: 0 auto;
+        }
+        .bottom {
+            border-radius: 5px;
+             border: 2px solid #45B7FF;
+            background-color: #000000;
+        }
+        .block {
+            margin: 0;
+            padding: 10px 20px 20px 20px;
+        }
+        .logo {
+            width: 100%;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .bienvenue{
+            color:#fefefe;
+        }
+       
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: FD4BF2;
+            color: #fefefe;
+            border: 1px solid #fff;
+            border-radius: 15px;
+            font-size: 20px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+<div class="body">
+    <div class="container">
+        
+        <div class="content">
+            <h1 class="text-center">Bonjour {{user.nickname}}!</h1>
+            <p class="block">
+                Bienvenue chez <strong>Wanted</strong>,
+                <p>Afin de s'assurer que c'est vous et personne d'autre qui tante d'accéder à votre compte, nous vous demandons de bien vouloir cliquer sur ce lien pour vous connecter</p>   
+            </p>
+            <p class="block text-center">
+                <a href="{{ url('validate_account', {"token": user.token}) }}" class="btn">Confirmer mon inscription!</a>
+            </p>
+            
+           
+            
+        </div>
+        <div class="footer">
+           
+            <p class="block bottom text-center bienvenue">
+                Envoyé par OverWeeB
+            </p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

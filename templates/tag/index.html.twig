@@ -1,0 +1,41 @@
+{% extends 'backoffice.html.twig' %}
+
+{% block titre %}
+    {{ title }}
+{% endblock %}
+{% block title %}
+    {{ parent() }} {{ title }}
+{% endblock %}
+
+
+
+{% block body %}
+
+    {{ form(formu) }}
+
+    <table class="table table-dark table-striped mt-5 w-75 mx-auto">
+        <thead>
+        <tr>
+            <th>Id</th>
+            <th>Nom</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+
+        {% for tag in tags %}
+            <tr>
+                <td >{{ tag.id }}</td>
+                <td>{{ tag.title }}</td>
+                <td>
+                    <a href="{{ path('tag_update', {'id': tag.id}) }}" class="btn btn-info">Modifier</a>
+                    <a href="{{ path('tag_delete', {'id': tag.id}) }}" class="btn btn-danger">Supprimer</a>
+
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+
+{% endblock %}
