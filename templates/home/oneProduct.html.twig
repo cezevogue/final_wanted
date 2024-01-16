@@ -1,0 +1,70 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+
+    <h1 class="text-center">{{ product.title }}</h1>
+
+    <div class="  border border-1 rounded border-secondary row justify-content-between">
+
+
+        <div class=" my-2 col-md-4  text-center border-end border-dark border-2 ">
+            <h3 class="text-decoration-underline">Aperçu</h3>
+            <img src="{{ asset('upload/'~product.medias[0].src) }}" width="200" class="img-fluid" id="image" alt="">
+        </div>
+        <div class=" my-2 col-md-4 text-center border-end border-dark border-2 " id="gallery">
+            <h3 class="text-decoration-underline">Galerie</h3>
+            {% for media in product.medias %}
+
+                <img src="{{ asset('upload/'~media.src) }}" class="img-thumbnail mt-1" width="100"
+                     alt="{{ media.title }}">
+
+
+            {% endfor %}
+        </div>
+
+        <div class=" my-2 col-md-4 border-left border-3 border-left-dark text-center">
+            <h3 class="text-decoration-underline">Détail</h3>
+
+            <h3>Prix: {{ product.price }}€</h3>
+            <h3>Catégorie: {{ product.category.title }}</h3>
+            <p>Description: {{ product.description }}</p>
+        </div>
+
+
+        <a href="" class="w-50 m-2 mx-auto btn btn-warning">Ajouter au panier</a>
+    </div>
+
+    <script>
+        let gallery = document.getElementById('gallery');
+
+        let img = document.getElementById('image');
+
+        gallery.addEventListener('click', changePhoto);
+
+        function changePhoto(e) {
+
+            clearStyle();
+
+            img.src = e.target.src;
+            e.target.style.border = '2px solid black';
+        }
+
+        function clearStyle() {
+            let imgs = document.getElementsByClassName('img-thumbnail');
+            // console.log(imgs);
+            for (let img of imgs) {
+                img.style.border = '';
+            }
+
+
+        }
+
+
+    </script>
+
+
+{% endblock %}
+
+
+

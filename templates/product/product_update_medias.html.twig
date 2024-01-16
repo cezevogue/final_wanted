@@ -1,0 +1,41 @@
+{% extends 'backoffice.html.twig' %}
+
+
+
+
+{% block body %}
+
+
+
+
+
+    <a href="{{ path('media_create', {'id': id}) }}" class="btn btn-secondary btn-lg">Ajouter des médias</a>
+
+
+
+    <form method="post" action="{{ path('product_delete_medias') }}">
+
+        {% for media in medias %}
+
+
+
+            <div  class="col-4 my-2">
+                <div class="row">
+                    <img class="col-12" src="{{ asset('upload/') }}{{ media.src }}" width="300" alt="">
+                    <div  class="form-check">
+                        <input class="form-check-input" name="choice[]" multiple type="checkbox" value="{{ media.id }}" id="flexCheckDefault">
+                        <label class="form-check-label" for="flexCheckIndeterminate">
+                            {{ media.title }}
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+
+        {% endfor %}
+
+        <button type="submit" class="btn btn-info">Supprimer les médias</button>
+    </form>
+
+{% endblock %}
+

@@ -2,6 +2,26 @@
 
 {% block body %}
 
+    <div class="row">
+        {% for product in products %}
+            <div class="col-4 m-2 card w-25">
+                <div class="card-header text-center">
+                    <img src="{{ asset('upload/'~product.medias[0].src) }}" class="card-img-top" alt="">
+
+
+                </div>
+                <div class="card-body text-center">
+                    <h2>{{ product.title }}</h2>
+                    <h3>{{ product.category.title }}</h3>
+                    <h4>{{ product.price }}€</h4>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ path('oneProduct', {'id': product.id}) }}" class="btn btn-info">Voir le détail</a>
+                    <a href="{{ path('cart_add', {'id': product.id, 'param': 'home'}) }}" class="btn btn-warning">Ajouter au panier</a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
 {% endblock %}
 
 {% block title %}

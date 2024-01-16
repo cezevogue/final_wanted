@@ -2,7 +2,8 @@
 
 namespace App\Service;
 
-use App\Repository\ActivityRepository;
+use App\Entity\Product;
+use App\Repository\ProductRepository;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 class CartService
@@ -13,39 +14,43 @@ class CartService
     private $session;
 
     // on créé ce constructeur pour injecter dans nos controller le repository et la session à l'appel du service
-    public function __construct(ActivityRepository $activityRepository, RequestStack $requestStack)
+    public function __construct(ProductRepository $repository, RequestStack $requestStack)
     {
-        $this->repository=$activityRepository;
+        $this->repository=$repository;
         $this->session=$requestStack;
 
     }
 
 
     // pour ajouter au panier
-    public function add($id)
+    public function add($id):void
     {
         // on récupère toute la session
         $local=$this->session->getSession();
         $cart=$local->get('cart', []);
-        // on verifie que l'activité n'est pas été déjà ajouté en session pour eviter les doublons
+        // on verifie que le produit n'a pas été déjà ajouté en session pour eviter les doublons
         if (!isset($cart[$id])){
 
             $cart[$id]=1;
         }
         // dans le cas ou l'on voudrait ajouter plusieurs fois au panier (ex: site ecommerce)
-//        else
-//        {
-//           // ici on incrémenterai la quantité
-//            $cart[$id]++;
-//        }
+        else
+        {
+           // ici on incrémente la quantité
+            $cart[$id]++;
+        }
 
         // on met à jour la session après avoir travaillé dessus
         $local->set('cart', $cart);
 
     }
 
+
+
+
+
     // pour ajouter au panier
-    public function remove($id)
+    public function remove($id):void
     {
         // on récupère toute la session
         $local=$this->session->getSession();
@@ -57,18 +62,35 @@ class CartService
             unset($cart[$id]);
         }
         //sinon on décrémente la quantité
-//         if (isset($cart[$id]) && $cart[$id]>1)
-//        {
-//           // ici on décrémenterai la quantité
-//            $cart[$id]--;
-//        }
+         if (isset($cart[$id]) && $cart[$id]>1)
+        {
+           // ici on décrémenterai la quantité
+            $cart[$id]--;
+        }
 
         // on met à jour la session après avoir travaillé dessus
 
         $local->set('cart', $cart);
     }
 
-    public function destroy()
+
+    public function delete($id):void
+    {
+        // on récupère toute la session
+        $local=$this->session->getSession();
+        $cart=$local->get('cart', []);
+        // on verifie l'existence de cette entrée et la quantité de fois ajouté
+        // si egale à 1 on supprime totalement cette entrée en session
+        if (isset($cart[$id]) && $cart[$id]==1){
+
+            unset($cart[$id]);
+        }
+        $local->set('cart', $cart);
+    }
+
+
+
+    public function destroy():void
     {
         $local=$this->session->getSession();
         // on détruit la session cart intégralement
@@ -77,7 +99,7 @@ class CartService
 
     }
 
-    public function getCartWithData()
+    public function getCartWithData(): array
     {
         $local=$this->session->getSession();
         $cart=$local->get('cart', []);
@@ -88,8 +110,8 @@ class CartService
         foreach ($cart as $id=>$quantity)
         {
             $cartWithData[]=[
-                // méthode retournant une seule entrée dans la table activity grace à son id
-                'activity'=>$this->repository->find($id),
+                // méthode retournant une seule entrée dans la table product grace à son id
+                'product'=>$this->repository->find($id),
                 'quantity'=>$quantity
 
             ];
@@ -98,8 +120,18 @@ class CartService
         return $cartWithData;
 
 
+    }
+
+    public function getTotal(): float
+    {
+        $total=0;
+        foreach ($this->getCartWithData() as $data)
+        {
+            $total+=$data['product']->getPrice()*$data['quantity'];
 
 
+        }
+        return $total;
     }
 
 

@@ -77,8 +77,8 @@
             <div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities"
                  data-parent="#accordionSidebar">
                 <div class="bg-white py-2 collapse-inner rounded">
-                    <a class="dropdown-item" href="">Ajouter un produit </a>
-                    <a class="dropdown-item" href="">Mes porduits </a>
+                    <a class="dropdown-item" href="{{ path('product_create') }}">Ajouter un produit </a>
+                    <a class="dropdown-item" href="{{ path('product_list') }}">Mes produits </a>
                 </div>
             </div>
         </li>
@@ -187,9 +187,9 @@
                  style="background-color: #000000;">
                 {#  #}
                 <!-- Sidebar Toggle (Topbar) -->
-                <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
-                    <i class="fa fa-bars"></i>
-                </button>
+{#                <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">#}
+{#                    <i class="fa fa-bars"></i>#}
+{#                </button>#}
 
                 <!-- Topbar Search -->
 
@@ -200,7 +200,7 @@
                     <li class="nav-item dropdown no-arrow">
                         <a class="nav-link " href="{{ path('home') }}" role="button">
                             <span class="mr-2 d-none d-lg-inline text-gray-600 small">Retour au site</span>
-                            <i class="img-profile fas fa-laugh-wink rounded-circle"></i>
+                            <i class="img-profile fas fa-home rounded-circle"></i>
                         </a>
 
                     </li>

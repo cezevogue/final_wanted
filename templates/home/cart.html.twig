@@ -1,0 +1,92 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    {% if cart is not empty %}
+    <table class="table table-dark table-striped mt-5 w-75 mx-auto">
+        <thead>
+        <tr>
+            <th>Produit</th>
+            <th>Prix unitaire</th>
+            <th>Catégorie</th>
+            <th>Aperçu</th>
+            <th class="text-center">Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+
+        {% for detail in cart %}
+            <tr>
+                <td>{{ detail.product.title }}</td>
+                <td>{{ detail.product.price }}€</td>
+                <td>{{ detail.product.category.title }}</td>
+                <td><img src="{{ asset('upload/' ~ detail.product.medias[0].src) }}" width="90" alt=""></td>
+                <td class="text-center  ">
+                    <a href="{{ path('cart_remove', {'id': detail.product.id}) }}" class="btn btn-light text-dark">-</a>
+                    <input class="rounded w-25 fw-bold text-center" type="text" value="{{ detail.quantity }}" readonly>
+                    <a href="{{ path('cart_add', {'id': detail.product.id, 'param': 'cart'}) }}"
+                       class="btn btn-light text-dark">+</a>
+
+                    <a href="{{ path('cart_delete', {'id': detail.product.id}) }}"
+                       class="d-block mx-auto mt-1 w-50 btn btn-warning ">Retirer du panier</a>
+
+
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <h3>Montant total: {{ total }}€</h3>
+
+
+
+        {% if app.user %}
+            <a href="{{ path('app_stripe_pay') }}" class="btn btn-info">Valider ma commande</a>
+        {% else %}
+            <a href="{{ path('app_login') }}" class="btn btn-success">Se connecter</a>
+        {% endif %}
+
+    {% else %}
+      <h3 class="text-center">Votre panier est vide</h3>
+    {% endif %}
+
+
+{% endblock %}
+     {% block javascripts %}
+         <script src="https://js.stripe.com/v3/"></script>
+         <script type="text/javascript">
+             var stripe = Stripe("pk_test_51NwOTlJ2Zd0dLxMHYFfLVX4zWU7NlEY93QtB6Lqk1E1l69livV6X4F8Rehc2iFyjxvm3u9Y6HiKanFOjS4t0xYpI00ghznAFWH");
+             var checkoutButton = document.getElementById("checkout-button");
+
+             checkoutButton.addEventListener('click', function () {
+                 fetch('/stripe/pay', {
+                     method: 'POST',
+                 })
+                     .then(function (response) {
+                         return response.json()
+                     })
+                     .then(function (session) {
+                         return stripe.redirectToCheckout({sessionId: session.id});
+                     })
+                     .then(function (result) {
+                         if (result.error) {
+                             alert(result.error.message);
+                         }
+                     })
+                     .catch(function (error) {
+                         console.error('Error', error);
+                     });
+             });
+         </script>
+
+
+
+     {% endblock %}
+
+
+
+
+{% block title %}
+
+{% endblock %}
+

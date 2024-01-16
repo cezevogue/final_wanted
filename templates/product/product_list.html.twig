@@ -1,0 +1,29 @@
+{% extends 'backoffice.html.twig' %}
+
+
+{% block title %}
+    {{ parent() }}
+{% endblock %}
+
+
+{% block body %}
+    <div class="row">
+        {% for product in products %}
+            <div class="col-4 m-2 card w-25">
+                <div class="card-header text-center">
+                    <h2>{{ product.title }}</h2>
+                    <h3>{{ product.category.title }}</h3>
+                    <h4>{{ product.price }}</h4>
+
+                </div>
+                <div class="card-body">
+                    <a href="{{ path('product_details', {'id': product.id}) }}" class="btn btn-secondary">Voir le détail</a>
+                    <a href="{{ path('product_update_medias', {'id': product.id}) }}" class="btn btn-secondary">Modifier les médias</a>
+                    <a href="{{ path('product_update_infos', {'id': product.id}) }}" class="btn btn-secondary">Modifier Les informations</a>
+                    <a href="{{ path('product_delete', {'id': product.id}) }}" class="btn btn-secondary">Supprimer</a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
+
