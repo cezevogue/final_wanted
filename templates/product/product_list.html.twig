@@ -1,9 +1,14 @@
 {% extends 'backoffice.html.twig' %}
 
 
-{% block title %}
-    {{ parent() }}
+{% block titre %}
+    {{ title }}
 {% endblock %}
+{% block title %}
+    {{ parent() ~title }}
+{% endblock %}
+
+
 
 
 {% block body %}

@@ -68,7 +68,10 @@
             <h1 class="text-center">Bonjour {{user.nickname}}!</h1>
             <p class="block">
                 Bienvenue chez <strong>Wanted</strong>,
-                <p>Afin de s'assurer que c'est vous et personne d'autre qui tante d'accéder à votre compte, nous vous demandons de bien vouloir cliquer sur ce lien pour vous connecter</p>   
+               <p>Si vous n'êtes pas à l'origine de cette demande merci de l'ignoré et d'accepter nos excuses</p>
+                <p>
+                    Sinon merci de cliquer sur le lien ci-dessous afin d'autentifier votre compte. Merci!
+                </p>
             </p>
             <p class="block text-center">
                 <a href="{{ url('validate_account', {"token": user.token}) }}" class="btn">Confirmer mon inscription!</a>
@@ -80,7 +83,7 @@
         <div class="footer">
            
             <p class="block bottom text-center bienvenue">
-                Envoyé par OverWeeB
+                Envoyé par Wanted
             </p>
         </div>
     </div>

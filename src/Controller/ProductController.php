@@ -17,16 +17,17 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/product')]
 class ProductController extends AbstractController
 {
+    // page de création et modification des produits uniquement sur les informations et non sur les médias
     #[Route('/create', name: 'product_create')]
     #[Route('/update/infos/{id}', name: 'product_update_infos')]
-    public function product_create(EntityManagerInterface $manager, Request $request,ProductRepository $repository, $id): Response
+    public function product_create(EntityManagerInterface $manager, Request $request, ProductRepository $repository, $id = null): Response
     {
-        if (!$id){
+        if (!$id) {
             $product = new Product();
-
-        }else{
-            $product=$repository->find($id);
-
+            $title = "Ajoute un produit";
+        } else {
+            $product = $repository->find($id);
+            $title = "Modification produit";
         }
 
 
@@ -38,26 +39,28 @@ class ProductController extends AbstractController
             $manager->flush();
 
 
-
-            if (!$id){
+            if (!$id) {
                 $this->addFlash('info', 'produit ajouté, ajoutez des médias en lien');
+                // en création on redirige sur la page d'ajout de médias en liens avec le produit d'où le param d'id du produit passé lors de la redirection
                 return $this->redirectToRoute('media_create', ['id' => $product->getId()]);
-            }else{
+            } else {
+                // en modification on redirige sur la page de détail du produit
                 $this->addFlash('info', 'informations modifiées');
                 return $this->redirectToRoute('product_details', ['id' => $product->getId()]);
 
             }
 
 
-
         }
 
 
         return $this->render('product/product_create.html.twig', [
-            'form' => $form->createView()
+            'form' => $form->createView(),
+            'title' => $title
         ]);
     }
 
+    // Page de mise en liens des médias (création de médias) avec le produit
     #[Route('/media/create/{id}', name: 'media_create')]
     public function media_create(Request $request, EntityManagerInterface $manager, ProductRepository $repository, $id): Response
     {
@@ -75,24 +78,28 @@ class ProductController extends AbstractController
             $product = $repository->find($id);
             // on recupère le fichier uploader
             $file = $form->get('src')->getData();
+           // nombre de médias existant en lien avec le produit que l'on incrémente de 1 pour concaténé au title du média ainsi qu'au renommage du src ci-dessous
+            $number = count($product->getMedias()) + 1;
 
-            $number=count($product->getMedias()) +1;
+            // on renomme le fichier en le concaténant avec date complète, son numéro puis nom d'origine du fichier (le title qui est celui du produit) et enfin son extension
+            $file_name = date('Y-m-d-H-i-s') . '-' . $product->getTitle() . $number . '.' . $file->getClientOriginalExtension();
 
-            // on renomme le fichier en le concaténant avec date complète puis nom d'origine du fichier
-            $file_name = date('Y-m-d-H-i-s') . '-' . $product->getTitle().$number.'.'. $file->getClientOriginalExtension();
-
-            // on upload
+            // on upload en ayant préalablement configuré le parameter 'upload_dir' dans le services.yaml de Config
+            //upload_dir: '%kernel.project_dir%/public/upload'
             $file->move($this->getParameter('upload_dir'), $file_name);
 
             // on reaffecte le renommage à l'objet
             $media->setSrc($file_name);
-            $media->setTitle($product->getTitle().$number);
+            $media->setTitle($product->getTitle() . $number);
+            // on ajoute au produit le media
             $product->addMedia($media);
+            // on persist le media
             $manager->persist($media);
-
+            // on persist le produit
             $manager->persist($product);
+            // on execute
             $manager->flush();
-            $this->addFlash('success', 'Média créé, vous pouvez en ajouter un autre ou cliquer sur terminé');
+            $this->addFlash('success', 'Média créé, vous pouvez en ajouter un autre et valider ou cliquer sur terminé pour voir le détail');
 
             return $this->redirectToRoute('media_create', ['id' => $product->getId()]);
 
@@ -105,16 +112,19 @@ class ProductController extends AbstractController
         ]);
     }
 
+    // page d'affichage de la liste des produits
     #[Route('/list', name: 'product_list')]
     public function product_list(ProductRepository $repository): Response
     {
 
-        $products=$repository->findAll();
+        $products = $repository->findAll();
         return $this->render('product/product_list.html.twig', [
-            'products'=>$products
+            'products' => $products,
+            'title' => 'Gestion des produits'
         ]);
     }
 
+    // page d'ajout de nouveaux médias au produit accessible par modifier les media et ajouter un nouveau média
     #[Route('/update/medias/{id}', name: 'product_update_medias')]
     public function product_update_medias(Product $product): Response
     {
@@ -122,70 +132,76 @@ class ProductController extends AbstractController
 
         return $this->render('product/product_update_medias.html.twig', [
             'id' => $product->getId(),
-            'medias'=>$product->getMedias()
-            ]);
+            'medias' => $product->getMedias(),
+            'title' => 'Gestion Médias du produit: ' . $product->getTitle()
+        ]);
     }
 
+    // suppression des médias par la page de gestion des médias
     #[Route('/delete/medias', name: 'product_delete_medias')]
-    public function product_delete_medias(Request $request,MediaRepository $repository, EntityManagerInterface $manager): Response
+    public function product_delete_medias(Request $request, MediaRepository $repository, EntityManagerInterface $manager): Response
     {
-
+       // les checkbox de name choice[] sont récupéré du formulaire
+        // car on peut vouloir supprimer plusieurs média.
+        // on les récupère via notre formulaire en post avec
+        // $request->request
         $medias_id = $request->request->all()['choice'];
-        $product_id='';
+        $product_id = '';
         foreach ($medias_id as $id) {
-
+      // on boucle sur tout les id receptionné
+            // pour chaque tour on récupère le média grace au repository et la méthode find
             $media = $repository->find($id);
-            $product_id=$media->getProduct()->getId();
+            $product_id = $media->getProduct()->getId();
 
+              // on supprime du dossier d'upload le fichier
+            unlink($this->getParameter('upload_dir') . '/' . $media->getSrc());
 
-                unlink($this->getParameter('upload_dir').'/'.$media->getSrc());
-
-
-
+           // puis on le supprime de la bdd
             $manager->remove($media);
 
         }
+        // on execute
         $manager->flush();
         $this->addFlash('info', 'Opération réalisée avec succès');
-
 
 
         return $this->redirectToRoute('product_details', ['id' => $product_id]);
 
     }
 
+    // page de détail du produit
     #[Route('/details/{id}', name: 'product_details')]
     public function product_details(Product $product): Response
     {
 
 
         return $this->render('product/product_details.html.twig', [
-        'product'=>$product
+            'product' => $product,
+            'title' => 'Détails produit'
         ]);
     }
 
 
+    // suppression d'un produit
     #[Route('/delete/{id}', name: 'product_delete')]
     public function product_delete(Product $product, EntityManagerInterface $manager): Response
     {
-        $medias=$product->getMedias();
+        // on récupère tout les médias du produit
+        $medias = $product->getMedias();
+       // on supprime tout les médias du dossier d'upload
+        foreach ($medias as $media) {
 
-        foreach ($medias as $media)
-        {
-
-            unlink($this->getParameter('upload_dir').'/'.$media->getSrc());
+            unlink($this->getParameter('upload_dir') . '/' . $media->getSrc());
 
         }
 
-
-
+     // puis on supprime en bdd le produit qui supprimera tout les médias en liens de même
         $manager->remove($product);
         $manager->flush();
 
         $this->addFlash('info', 'Opération réalisée avec succès');
         return $this->redirectToRoute('product_list');
     }
-
 
 
 }

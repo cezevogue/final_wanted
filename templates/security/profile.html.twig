@@ -1,0 +1,24 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+
+    <div class="row w-50 mx-auto border mt-3 rounded p-4">
+        <div class="col-md-3">
+            <a href="" class="btn btn-secondary mt-2 btn-lg">Modifier mes informations</a>
+            <a href="{{ path('order_purchases') }}" class="btn btn-secondary mt-2 btn-lg">Voir mes commandes</a>
+        </div>
+        <div class="col-md-9">
+            <h2 class="text-center mb-3">Mes informations</h2>
+            <h3>Pseudo: {{ app.user.nickname }}</h3>
+            <h3>Email: {{ app.user.email }}</h3>
+
+
+        </div>
+    </div>
+{% endblock %}
+
+{% block title %}
+
+{% endblock %}
+

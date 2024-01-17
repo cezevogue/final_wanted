@@ -14,6 +14,9 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/admin/tag')]
 class TagController extends AbstractController
 {
+    // similaire au catégorie controller
+
+
     #[Route('/update/{id}', name: 'tag_update')]
     #[Route('/', name:'tag_create')]
     public function index(Request $request, EntityManagerInterface $manager,TagRepository $repository, $id=null): Response

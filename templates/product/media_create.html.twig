@@ -1,10 +1,26 @@
 {% extends 'backoffice.html.twig' %}
 
-{% block body %}
-    {{ form(form) }}
-    <img id="image" width="300" alt=""><br>
-    <a href="{{ path('product_list') }}" class="btn btn-success mt-2">Terminer</a>
+{% block titre %}
+    {{ title }}
+{% endblock %}
+{% block title %}
+    {{ parent() ~title }}
+{% endblock %}
 
+
+
+{% block body %}
+    <div class="d-flex">
+        <div class="mr-5 mt-3">
+            {{ form(form) }}
+            <img id="image" width="300" alt=""><br>
+        </div>
+
+
+        <div>
+            <a href="{{ path('product_list') }}" class="ml-5 mt-5 btn btn-lg btn-success ">Terminer</a>
+        </div>
+    </div>
     <script>
         var loadFile = function (event) {
             var image = document.getElementById('image');
@@ -15,9 +31,5 @@
         };
 
     </script>
-{% endblock %}
-
-{% block title %}
-    {{ title }}
 {% endblock %}
 

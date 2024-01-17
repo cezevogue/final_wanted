@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+
+
+{% block title %}
+    {{ parent() }}
+{% endblock %}
+
+
+{% block body %}
+    {% set total=0 %}
+
+    {% for purchase in order.purchases %}
+        {% set total=total+(purchase.product.price*purchase.quantity) %}
+    {% endfor %}
+    <div class="w-50 alert text-center alert-info mt-3 rounded mx-auto">
+        <h3>Commande N°{{ order.id }} du {{ order.date.format('d/m/Y') }}</h3>
+        <h3>Montant total:{{ total }}€</h3>
+        <h3>
+            {% if order.status==0 %}
+                En cours de traitement
+            {% endif %}
+            {% if order.status==1 %}
+                Expédiée
+            {% endif %}
+            {% if order.status==2 %}
+                Terminée
+            {% endif %}
+        </h3>
+    </div>
+    <div class="row">
+
+        {% for purchase in order.purchases %}
+            <div class="col-4 m-2 card w-25">
+                <div class="card-header text-center">
+                    <h3>{{ purchase.product.title }}</h3>
+                    <h4>Catégorie:{{ purchase.product.category.title }}</h4>
+                    <h4>Prix Unitaire:{{ purchase.product.price }}€</h4>
+                    <h4>Quantité:{{ purchase.quantity }}</h4>
+
+                </div>
+                {% if order.status==2 %}
+                    <div class="card-footer">
+                        <a href="" class="btn btn-warning">Laisser un Avis</a>
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
+

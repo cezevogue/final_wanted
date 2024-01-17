@@ -48,6 +48,10 @@
                             <div class="dropdown-divider"></div>
                             <li><a class="dropdown-item" href="{{ path('dashboard') }}">Accès Backoffice </a>
                             </li>
+                            {% else %}
+                                <div class="dropdown-divider"></div>
+                                <li><a class="dropdown-item" href="{{ path('profile') }}">Mon Compte </a>
+                                </li>
                         {% endif %}
 
                     </ul>
