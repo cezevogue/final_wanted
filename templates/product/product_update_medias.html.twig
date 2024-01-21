@@ -20,15 +20,15 @@
 
 
 
-    <form method="post" action="{{ path('product_delete_medias') }}">
+    <form method="post" class="mt-5" action="{{ path('product_delete_medias') }}">
 
+
+        <div class="row">
         {% for media in medias %}
-
-
 
             <div  class="col-4 my-2">
                 <div class="row">
-                    <img class="col-12" src="{{ asset('upload/') }}{{ media.src }}" width="300" alt="">
+                    <img class="col-12" src="{{ asset('upload/') }}{{ media.src }}" width="200" alt="">
                     <div  class="form-check">
                         <input class="form-check-input" name="choice[]" multiple type="checkbox" value="{{ media.id }}" id="flexCheckDefault">
                         <label class="form-check-label" for="flexCheckIndeterminate">
@@ -40,8 +40,8 @@
 
 
         {% endfor %}
-
-        <button type="submit" class="btn btn-info">Supprimer les médias</button>
+        </div>
+        <button type="submit" class=" mt-5 btn-block btn btn-info">Supprimer les médias</button>
     </form>
 
 {% endblock %}

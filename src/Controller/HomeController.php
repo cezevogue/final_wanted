@@ -3,9 +3,13 @@
 namespace App\Controller;
 
 use App\Entity\Product;
+use App\Entity\Rating;
+use App\Repository\CategoryRepository;
 use App\Repository\ProductRepository;
 use App\Service\CartService;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -14,20 +18,47 @@ class HomeController extends AbstractController
 
     // page d'accueil
     #[Route('/', name: 'home')]
-    public function home(ProductRepository $productRepository): Response
+    #[Route('/filter', name: 'filter')]
+    public function home(ProductRepository $repository, CategoryRepository $categoryRepository,Request $request): Response
     {
-       // renvoie la liste des produits avec la possibilité de filtrer, de voir le détail et de l'ajouter au panier
+        // renvoie la liste des products avec la possibilité de filtrer, de voir le détail et de l'ajouter au panier
 
-        // récupération de tout les produits
-        $products=$productRepository->findAll();
+        // récupération de tout les products
+        $products = $repository->findAll();
+
+        $categories = $categoryRepository->findAll();
+
+
+
+
+      if (!empty($_POST)){
+
+          if ($request->request->get('categorie') && empty($request->request->get('prix'))):
+              $products = $repository->findBy(['category' => $request->request->get('categorie')]);
+          // dd($products);
+          elseif ($request->request->get('prix') && empty($request->request->get('categorie'))):
+              $products = $repository->findByPrice($request->request->get('prix'));
+          elseif ($request->request->get('prix') && $request->request->get('categorie')):
+              $products = $repository->findByPriceCategory($request->request->get('prix'), $request->request->get('categorie'));
+
+          else:
+              $products = $repository->findAll();
+          endif;
+
+      }
+
 
 
         return $this->render('home/home.html.twig', [
-           'products'=>$products
+            "categories" => $categories,
+            'products' => $products
         ]);
     }
 
-    // page détail d'un produit coté utilisateur
+
+
+
+    // page détail d'un product coté utilisateur
     #[Route('/oneProduct/{id}', name: 'oneProduct')]
     public function oneProduct(Product $product): Response
     {
@@ -35,9 +66,8 @@ class HomeController extends AbstractController
         // ici $product est rempli de toutes ses information car id en param et entite en injection de dépendance (à préciser que cela ne fonctionne pas si plusieurs entité ont été injecté ou qu'un repository a été injecté dans les ())
 
 
-
         return $this->render('home/oneProduct.html.twig', [
-            'product'=>$product
+            'product' => $product
         ]);
     }
 
@@ -59,7 +89,7 @@ class HomeController extends AbstractController
         return $this->redirectToRoute('cart');
     }
 
-    // retrait complet du produit du panier
+    // retrait complet du product du panier
     #[Route('/cart/delete/{id}', name: 'cart_delete')]
     public function cart_delete(CartService $cartService, $id): Response
     {
@@ -76,8 +106,41 @@ class HomeController extends AbstractController
 
 
         return $this->render('home/cart.html.twig', [
-            'cart'=>$cart,
-            'total'=>$cartService->getTotal()
+            'cart' => $cart,
+            'total' => $cartService->getTotal()
+        ]);
+    }
+
+    #[Route('/rate/{id}', name: 'rate')]
+    public function rate(Product $product, Request $request, EntityManagerInterface $manager)
+    {
+
+        if (!empty($_POST)) {
+            $comment = new Rating();
+            $comment->setRate($request->request->get('rate'));
+            $comment->setComment($request->request->get('comment'));
+            $comment->setProduct($product);
+            $comment->setUser($this->getUser());
+            $manager->persist($comment);
+            $manager->flush();
+            $this->addFlash('success', 'Merci pour votre  contribution');
+            return $this->redirectToRoute('comments', ['id' => $product->getId()]);
+
+        }
+
+
+    }
+
+    #[Route('/comments/{id}', name: 'comments')]
+    public function comments(Product $product, Request $request, EntityManagerInterface $manager)
+    {
+
+
+        $comments = $product->getRatings();
+
+
+        return $this->render('home/comments.html.twig', [
+            'comments' => $comments
         ]);
     }
 

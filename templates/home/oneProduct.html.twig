@@ -1,7 +1,66 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer"/>
 
+    <style>
+        .rating {
+            margin-top: 20px;
+            position: relative;
+            width: 250px;
+            background: transparent;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.3em;
+            padding: 10px;
+            overflow: hidden;
+            border-radius: 20px;
+            box-shadow: 0 0 2px #b3acac;
+        }
+
+        .rating__result {
+            position: absolute;
+            top: 0;
+            left: -20px;
+            transform: translateY(-10px) translateX(-5px);
+            z-index: 2;
+            font: 1.3em Arial, Helvetica, sans-serif;
+            color: rgba(7, 5, 5, 0.56);
+            pointer-events: none;
+        }
+
+        .rating__star {
+            font-size: 2em;
+            cursor: pointer;
+            color: #dabd18b2;
+            transition: filter linear 0.3s;
+        }
+
+        .rating__star:hover {
+            filter: drop-shadow(1px 1px 4px gold);
+        }
+    </style>
+
+
+    {% set allready=false %}
+    {% if app.user %}
+        {% for order in app.user.orderPurchases %}
+            {% for purchase in order.purchases %}
+                {% if purchase.product.id == product.id %}
+                    {% set allready=true %}
+
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+
+        {% for rating in app.user.ratings %}
+            {% if rating.product.id == product.id %}
+                {% set allready=false %}
+            {% endif %}
+        {% endfor %}
+
+    {% endif %}
 
     <h1 class="text-center">{{ product.title }}</h1>
 
@@ -29,11 +88,41 @@
             <h3>Prix: {{ product.price }}€</h3>
             <h3>Catégorie: {{ product.category.title }}</h3>
             <p>Description: {{ product.description }}</p>
+            <a href="{{ path('comments', {'id': product.id}) }}">{{ product.ratings | length~' commentaire-s' }}</a><br>
+            {% set moyenne=0 %}
+            {% for commentaire in product.ratings %}
+                {% set moyenne= moyenne+commentaire.rate %}
+            {% endfor %}
+            {% if product.ratings | length != 0 %}
+                {% set moyFin=moyenne / (product.ratings | length ) %}
+                Note:{{ moyFin ~ '/5' }}
+            {% endif %}
         </div>
 
 
-        <a href="" class="w-50 m-2 mx-auto btn btn-warning">Ajouter au panier</a>
+        <a href="{{ path('cart_add', {'id': product.id, 'param': 'home'}) }}" class="w-50 m-2 mx-auto btn btn-warning">Ajouter au panier</a>
     </div>
+    {% if allready ==true %}
+
+        <form class="mt-4 border rounded pt-1 pb-5 px-5" action="{{ path('rate', {'id': product.id}) }}" method='post'>
+            <h3>Donnez votre avis</h3>
+            <div class="rating">
+                <span class="rating__result "></span>
+                <i class="rating__star far fa-star"></i>
+                <i class="rating__star far fa-star"></i>
+                <i class="rating__star far fa-star"></i>
+                <i class="rating__star far fa-star"></i>
+                <i class="rating__star far fa-star"></i>
+            </div>
+            <input type="hidden" id='note' name='rate'>
+            <input type="hidden" name='produit' value="{{ product.id }}">
+            <div class="form-group">
+                <label for="exampleTextarea" class="form-label mt-4">commentaire</label>
+                <textarea class="form-control border" name="comment" id="exampleTextarea" rows="1"></textarea>
+            </div>
+            <button type="submit" class="btn mt-2 btn-sm btn-primary">Soumettre</button>
+        </form>
+    {% endif %}
 
     <script>
         let gallery = document.getElementById('gallery');
@@ -61,7 +150,52 @@
         }
 
 
+        const ratingStars = [...document.getElementsByClassName("rating__star")];
+        const ratingResult = document.querySelector(".rating__result");
+        let note = document.getElementById('note');
+
+        printRatingResult(ratingResult);
+
+        function executeRating(stars, result) {
+            const starClassActive = "rating__star fas fa-star";
+            const starClassUnactive = "rating__star far fa-star";
+            const starsLength = stars.length;
+            let i;
+            stars.map((star) => {
+                star.onclick = () => {
+                    i = stars.indexOf(star);
+
+                    if (star.className.indexOf(starClassUnactive) !== -1) {
+                        printRatingResult(result, i + 1);
+                        let rating = 0;
+                        for (i; i >= 0; -- i)
+                            stars[i].className = starClassActive;
+
+
+
+                    } else {
+                        printRatingResult(result, i);
+                        for (i; i < starsLength; ++ i)
+                            stars[i].className = starClassUnactive;
+
+
+
+                    }
+                };
+            });
+        }
+
+        function printRatingResult(result, num = 0) {
+            result.textContent = `${num}/5`;
+            note.value = num
+        }
+
+        executeRating(ratingStars, ratingResult);
+
+
     </script>
+
+
 
 
 {% endblock %}
