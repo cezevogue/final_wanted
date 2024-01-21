@@ -11,6 +11,7 @@ use Stripe\Stripe;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class StripePayController extends AbstractController
 {
@@ -19,6 +20,7 @@ class StripePayController extends AbstractController
     // doc: https://stripe.com/docs/checkout/quickstart
 
 
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     #[Route('/stripe/pay', name: 'app_stripe_pay')]
     public function index(CartService $cs): Response
     {
@@ -62,8 +64,10 @@ class StripePayController extends AbstractController
     }
 
 
+
     // url de succes, ici on peu valider la commande
     #[Route('/commande/{success}', name: 'commande')]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function commande(CartService $cartService, EntityManagerInterface $manager, $success = null): Response
     {
         if ($success) {

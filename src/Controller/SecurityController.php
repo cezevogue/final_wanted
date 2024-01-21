@@ -18,6 +18,7 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\PasswordHasher\PasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 #[Route('/security')]
@@ -214,6 +215,7 @@ class SecurityController extends AbstractController
 
 
     // profil de l'utilisateur
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     #[Route('/profile', name: 'profile')]
     public function profile(): Response
     {
@@ -227,6 +229,7 @@ class SecurityController extends AbstractController
 
     // page renvoyant à l'utilisateur l'historique de ses commandes ainsi que leur statut de prise en charge
     #[Route('/order_purchases', name: 'order_purchases')]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function order_purchases(OrderPurchaseRepository $repository): Response
     {
 
@@ -239,6 +242,7 @@ class SecurityController extends AbstractController
     }
 
     // page de détail d'une commande
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     #[Route('/order_detail/{id}', name: 'order_detail')]
     public function order_detail(OrderPurchase $order): Response
     {

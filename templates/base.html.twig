@@ -34,6 +34,8 @@
                 <li class="nav-item">
                     <a class="nav-link" href="#">Pricing</a>
                 </li>
+                {% if app.user %}
+
                 <li class="nav-item dropdown me-5">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                        aria-expanded="false">
@@ -56,6 +58,7 @@
 
                     </ul>
                 </li>
+                {% endif %}
             </ul>
             {% if app.session.get('cart') is defined and  app.session.get('cart') is not empty%}
                 <div>
