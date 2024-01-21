@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Repository\OrderPurchaseRepository;
+use App\Repository\RatingRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -86,6 +87,29 @@ class AdminController extends AbstractController
         return $this->render('admin/orders.html.twig', [
             'orders' => $orders,
             'title'=>'Gestion des commandes'
+        ]);
+    }
+
+    #[Route('/rating_moderation', name:'rating_moderation')]
+    #[Route('/publish_edit/{id}', name:'publish_edit')]
+    public function rating_moderation(RatingRepository $repository,EntityManagerInterface $manager, $id=null): Response
+    {
+
+        if ($id)
+        {
+            $rating= $repository->find($id);
+            $rating->setPublish(!$rating->isPublish());
+            $manager->persist($rating);
+            $manager->flush();
+            return $this->redirectToRoute('rating_moderation');
+
+        }
+
+        $ratings = $repository->findBy([], ['publish'=>'DESC', 'publishDate'=>'DESC']);
+
+        return $this->render('admin/rating_moderation.html.twig', [
+            'ratings' => $ratings,
+            'title'=>'Modération des avis'
         ]);
     }
 

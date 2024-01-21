@@ -122,11 +122,13 @@ class HomeController extends AbstractController
             $comment->setRate($request->request->get('rate'));
             $comment->setComment($request->request->get('comment'));
             $comment->setProduct($product);
+            $comment->setPublish(false);
+            $comment->setPublishDate(new \DateTime());
             $comment->setUser($this->getUser());
             $manager->persist($comment);
             $manager->flush();
             $this->addFlash('success', 'Merci pour votre  contribution');
-            return $this->redirectToRoute('comments', ['id' => $product->getId()]);
+            return $this->redirectToRoute('oneProduct', ['id' => $product->getId()]);
 
         }
 

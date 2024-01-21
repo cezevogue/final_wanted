@@ -88,13 +88,18 @@
             <h3>Prix: {{ product.price }}€</h3>
             <h3>Catégorie: {{ product.category.title }}</h3>
             <p>Description: {{ product.description }}</p>
-            <a href="{{ path('comments', {'id': product.id}) }}">{{ product.ratings | length~' commentaire-s' }}</a><br>
             {% set moyenne=0 %}
+            {% set nbComment=0 %}
             {% for commentaire in product.ratings %}
-                {% set moyenne= moyenne+commentaire.rate %}
+                {% if commentaire.publish == true %}
+                    {% set moyenne= moyenne+commentaire.rate %}
+                    {% set nbComment=nbComment+1 %}
+                {% endif %}
             {% endfor %}
-            {% if product.ratings | length != 0 %}
-                {% set moyFin=moyenne / (product.ratings | length ) %}
+            <a href="{{ path('comments', {'id': product.id}) }}">{{ nbComment ~' commentaire-s' }}</a><br>
+
+            {% if nbComment != 0 %}
+                {% set moyFin=moyenne / (nbComment ) %}
                 Note:{{ moyFin ~ '/5' }}
             {% endif %}
         </div>

@@ -26,6 +26,12 @@ class Rating
     #[ORM\ManyToOne(inversedBy: 'ratings')]
     private ?Product $product = null;
 
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    private ?\DateTimeInterface $publishDate = null;
+
+    #[ORM\Column]
+    private ?bool $publish = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -75,6 +81,30 @@ class Rating
     public function setProduct(?Product $product): static
     {
         $this->product = $product;
+
+        return $this;
+    }
+
+    public function getPublishDate(): ?\DateTimeInterface
+    {
+        return $this->publishDate;
+    }
+
+    public function setPublishDate(\DateTimeInterface $publishDate): static
+    {
+        $this->publishDate = $publishDate;
+
+        return $this;
+    }
+
+    public function isPublish(): ?bool
+    {
+        return $this->publish;
+    }
+
+    public function setPublish(bool $publish): static
+    {
+        $this->publish = $publish;
 
         return $this;
     }
