@@ -27,22 +27,44 @@ class SecurityController extends AbstractController
 
     // méthode d'inscription
     #[Route('/register', name: 'register')]
+    #[Route('/edit', name: 'account_edit')]
     public function index(EntityManagerInterface $manager, Request $request, UserPasswordHasherInterface $hasher, MailerInterface $mailer): Response
     {
 
         // nouvel objet utilisateur
-        $user = new User();
+        if (!$this->getUser()) {
+
+            $user = new User();
+        } else {
+
+            $user = $this->getUser();
+        }
+
         // on défini son statut d'activation du compte à 0 par defaut
         $user->setActive(0);
         // on génère un token pour le transmettre dans le mail d'activation
         $user->setToken($this->generateToken());
-        $form = $this->createForm(RegisterType::class, $user);
+        if (!$this->getUser()) {
+            $form = $this->createForm(RegisterType::class, $user, ['create' => true]);
+        }else
+        {
+            $form = $this->createForm(RegisterType::class, $user, ['edit' => true]);
+
+        }
+
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             // on hash le mot de passe grace à la UserPasswordHasherInterface qui va vérifier que le user implement la userInterface ainsi que la PasswordAuthenticatedUserInterface (c'est elle qui va vérifier l'encodage dans le security.yml).
+            if (!$this->getUser()){
+                $user->setPassword($hasher->hashPassword($user, $user->getPassword()));
+            }
 
-            $user->setPassword($hasher->hashPassword($user, $user->getPassword()));
+            $send=true;
+            if ($this->getUser()->getEmail()==$user->getEmail()){
+                $send=false;
+
+            }
 
 
             $manager->persist($user);
@@ -51,6 +73,7 @@ class SecurityController extends AbstractController
 
             // préparation de l'envoie de l'email avec les infos de l'objet user en utilisant un template
             // les configuration du mailer sont posées dans le .env à MAILER_DNS (on passe par un compte brevo anciennement sendinBlue)
+            if ($send):
             $email = (new TemplatedEmail())
                 ->from('cezdesaulle.evogue@gmail.com')
                 ->to($userMail)
@@ -65,8 +88,20 @@ class SecurityController extends AbstractController
                 ]);
             // $mailer->IsSMTP();
             $mailer->send($email);
+            endif;
             // do anything else you need here, like send an email
-            $this->addFlash('success', "Votre compte a bien été créé, allez vite l'activer");
+            if (!$this->getUser()) {
+                $this->addFlash('success', "Votre compte a bien été créé, allez vite l'activer");
+            }else{
+                if ($send){
+                    $this->addFlash('success', "Vérifiez votre boite mail");
+
+                }else{
+                    $this->addFlash('success', "Information modifiée");
+                    return $this->redirectToRoute('profile');
+                }
+
+            }
 
             return $this->redirectToRoute('app_login');
 
@@ -143,7 +178,7 @@ class SecurityController extends AbstractController
         // récupération de la saisie de l'email provenant du formulaire formulaire
         $email = $request->request->get('email', '');
         if (!empty($email)) {
-       // si on a un email de renseigné
+            // si on a un email de renseigné
             // on requête un user grace à son email
             $user = $repo->findOneBy(['email' => $email]);
 
@@ -233,11 +268,11 @@ class SecurityController extends AbstractController
     public function order_purchases(OrderPurchaseRepository $repository): Response
     {
 
-        $orders=$repository->findBy(['user'=>$this->getUser()],['date'=>'DESC']);
+        $orders = $repository->findBy(['user' => $this->getUser()], ['date' => 'DESC']);
 
 
         return $this->render('security/order_purchases.html.twig', [
-        'orders'=>$orders
+            'orders' => $orders
         ]);
     }
 
@@ -248,10 +283,8 @@ class SecurityController extends AbstractController
     {
 
 
-
-
         return $this->render('security/order_detail.html.twig', [
-            'order'=>$order
+            'order' => $order
         ]);
     }
 

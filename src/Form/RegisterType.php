@@ -15,51 +15,88 @@ class RegisterType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $builder
-            ->add('nickname', TextType::class,[
-                'required'=>false,
-                'label'=>'Pseudo',
-                'attr'=>[
-                    'placeholder'=>'Saisissez votre pseudo'
-                ]
 
-            ])
-            ->add('email', EmailType::class,[
-                'required'=>false,
-                'label'=>'Email',
-                'attr'=>[
-                    'placeholder'=>'Saisissez votre email'
-                ]
-            ])
-            ->add('password', PasswordType::class,[
-                'required'=>false,
-                'label'=>'Mot de passe',
-                'attr'=>[
-                    'placeholder'=>'Saisissez un mot de passe'
-                ]
 
-            ])
-            ->add('confirmPassword', PasswordType::class,[
-                'required'=>false,
-                'label'=>'Confirmation de mot de passe',
-                'attr'=>[
-                    'placeholder'=>'confirmez le mot de passe'
-                ]
+        if ($options['create']){
 
-            ])
-            ->add('valider', SubmitType::class,[
-                'attr'=>[
-                    'class'=>'mt-3 btn btn-primary'
-                ]
-            ])
+            $builder
+                ->add('nickname', TextType::class,[
+                    'required'=>false,
+                    'label'=>'Pseudo',
+                    'attr'=>[
+                        'placeholder'=>'Saisissez votre pseudo'
+                    ]
 
-        ;
+                ])
+                ->add('email', EmailType::class,[
+                    'required'=>false,
+                    'label'=>'Email',
+                    'attr'=>[
+                        'placeholder'=>'Saisissez votre email'
+                    ]
+                ])
+                ->add('password', PasswordType::class,[
+                    'required'=>false,
+                    'label'=>'Mot de passe',
+                    'attr'=>[
+                        'placeholder'=>'Saisissez un mot de passe'
+                    ]
+
+                ])
+                ->add('confirmPassword', PasswordType::class,[
+                    'required'=>false,
+                    'label'=>'Confirmation de mot de passe',
+                    'attr'=>[
+                        'placeholder'=>'confirmez le mot de passe'
+                    ]
+
+                ])
+                ->add('valider', SubmitType::class,[
+                    'attr'=>[
+                        'class'=>'mt-3 btn btn-primary'
+                    ]
+                ])
+
+            ;
+
+
+        }elseif ($options['edit']){
+
+            $builder
+                ->add('nickname', TextType::class,[
+                    'required'=>false,
+                    'label'=>'Pseudo',
+                    'attr'=>[
+                        'placeholder'=>'Saisissez votre pseudo'
+                    ]
+
+                ])
+                ->add('email', EmailType::class,[
+                    'required'=>false,
+                    'label'=>'Email',
+                    'attr'=>[
+                        'placeholder'=>'Saisissez votre email'
+                    ]
+                ])
+
+                ->add('valider', SubmitType::class,[
+                    'attr'=>[
+                        'class'=>'mt-3 btn btn-primary'
+                    ]
+                ])
+
+            ;
+
+        }
+
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => User::class,
+            'create'=>false,
+            'edit'=>false
         ]);
     }
 }
