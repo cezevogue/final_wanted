@@ -8,11 +8,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css"
           integrity="sha512-b2QcS5SsA8tZodcDtGRELiGv5SaKSk1vDHDaQRda0htPYWZ6046lr3kJ5bAAQdpV2mmA/4v0wQF9MyU6/pDIAg=="
           crossorigin="anonymous" referrerpolicy="no-referrer"/>
+
     {% block stylesheets %}
     {% endblock %}
 
     {% block javascripts %}
-        {% block importmap %}{{ importmap('app') }}{% endblock %}
+{#        {% block importmap %}{{ importmap('app') }}{% endblock %}#}
     {% endblock %}
 </head>
 <body>
@@ -60,6 +61,26 @@
                 </li>
                 {% endif %}
             </ul>
+
+
+                        <div class="main_search">
+                            <div class=" d-flex" >
+                                <input type="text" class="form-control" id="search"  placeholder="Entrez un ou plusieur ingrédients">
+                                <button id="search-btn" class=" btn btn-dark" type="submit">C'est parti !</button>
+                            </div>
+                            <!-- /input-group -->
+                            <ul class="list-group auto_search" id="entitiesNav"></ul>
+                        </div>
+
+
+
+{#                <div>#}
+{#                    <form action="">#}
+{#                        <input id='obj-input' type="hidden" name="js_object">#}
+{#                       #}
+{#                    </form>#}
+{#                </div>#}
+
             {% if app.session.get('cart') is defined and  app.session.get('cart') is not empty%}
                 <div>
                     <a href="{{ path('cart') }}" class=" ms-5 btn btn-warning ">Voir Mon Panier</a>
@@ -100,5 +121,159 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
         integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
         crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script>
+
+let input=document.getElementById("search");
+
+    $(function() {
+
+
+            var searchRequest = null;
+            $("#search").on("keyup", function(e) {
+                if( e.key !== 'ArrowDown'&& e.key !== 'ArrowUp'){
+
+                    var minlength = 3;
+                    var that = this;
+                    var value = $(this).val();
+                    var entitySelector = $("#entitiesNav").html('');
+
+                    if (value.length >= minlength ) {
+                        if (searchRequest != null)  searchRequest.abort();
+                        console.log( value)
+                        searchRequest = $.ajax({
+                            type: "get",
+                            url: "/search",
+                            data: {
+                                'q' : value
+                            },
+                            dataType: "json",
+                            success: function(msg){
+
+                                if (value==$(that).val()) {
+                                    $.each(msg, function(key, arr) {
+                                        let i = 0
+                                        $.each(arr, function(id, value) {
+                                            if (key == 'entities') {
+
+                                                //création des <li> de suggestion
+
+                                                if (id != 'error') {
+
+
+
+
+                                                        entitySelector.append('<li class="list-group-item result_bar" id="es'+id+'"><span class="value">'+value+'</span></li>');
+                                                        i++
+
+                                                } else {
+                                                    entitySelector.append('<li class="errorLi list-group-item result_bar">'+value+'</li>');
+                                                }
+                                            }
+                                        });
+
+                                    });
+                                }
+
+                                //Event mouseOver
+
+                                $(".result_bar").on({
+                                    mouseenter: function () {
+                                        if(!$(this).hasClass('errorLi')){
+                                            $(".result_bar").removeClass('active select')
+                                            $(this).toggleClass('active');
+                                            let mot = $(this).text()
+                                            $('#search').val(mot)
+                                        }
+                                    },
+                                    mouseleave: function () {
+                                        $(this).toggleClass('active');
+                                        $('#search').val('')
+
+                                    }
+                                });
+
+
+                                //Event click remplisage de la page
+                                $(".result_bar").on('click', function(){
+
+                                    if(!$(this).hasClass('errorLi')){
+
+
+                                    }
+                                })
+
+                                //Event sur la touche entrée pour générer le même résultat qu'au click
+
+                                //reset de la recherche au click sur le document
+                                document.addEventListener('click', (e) => {
+                                    value = '';
+                                   entitySelector.text('');
+                                })
+
+                                //Preventdefault navigateur
+                                document.getElementById('search').addEventListener('keydown', function(e) {
+                                    if (e.key === 'ArrowDown' || e.key === 'ArrowUp'||e.key === 'Enter') {
+                                        e.preventDefault();
+                                    }
+                                });
+
+                                //Event navigation liste fleches
+
+                                var k= -1;
+                                input.addEventListener('keydown', (e) =>{
+
+                                    if(e.key === 'ArrowDown' && k < $(".result_bar").length-1) {
+
+                                        $(".result_bar").removeClass('active select')
+                                        k++
+                                        $('#es'+k).addClass('active select');
+
+                                        let mots = $('.select').text()
+                                        $('#search').val(mots)
+                                    }
+                                })
+
+                                input.addEventListener('keydown', (e) =>{
+
+                                    if(e.key === 'ArrowUp'&& k > 0){
+                                        $(".result_bar").removeClass('active select')
+                                        k--
+                                        $('#es'+k).addClass('active select');
+
+                                        let mots = $('.select').text()
+                                        $('#search').val(mots)
+                                    }
+
+                                })
+
+
+
+
+                            }
+                        });
+                    }
+                }
+            });
+
+
+
+
+
+
+
+
+
+
+
+
+
+    });
+
+
+
+</script>
+
 </body>
 </html>

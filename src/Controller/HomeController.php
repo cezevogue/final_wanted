@@ -149,4 +149,35 @@ class HomeController extends AbstractController
     }
 
 
+    #[Route('/search', name: 'app_search', methods: 'GET')]
+    public function searchAction(Request $request, ProductRepository $repo)
+    {
+
+
+        $requestString = $request->get('q');
+
+        $products = $repo->findBySearch($requestString);
+
+        if (!$products) {
+            $result['entities']['error'] = "Aucun résultat";
+        } else {
+
+            $result['entities'] = $this->getRealEntities($products);
+        }
+
+        return new Response(json_encode($result));
+    }
+
+    public function getRealEntities($entities): array
+    {
+        $realEntities=[];
+        foreach ($entities as $entity) {
+            $realEntities[$entity->getId()] = $entity->getTitle();
+        }
+
+        return $realEntities;
+    }
+
+
+
 }
