@@ -8,6 +8,7 @@ use App\Form\NewPasswordType;
 use App\Form\RegisterType;
 use App\Repository\OrderPurchaseRepository;
 use App\Repository\UserRepository;
+use App\Service\EmailService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\Entity;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
@@ -28,7 +29,7 @@ class SecurityController extends AbstractController
     // méthode d'inscription
     #[Route('/register', name: 'register')]
     #[Route('/edit', name: 'account_edit')]
-    public function index(EntityManagerInterface $manager, Request $request, UserPasswordHasherInterface $hasher, MailerInterface $mailer): Response
+    public function index(EntityManagerInterface $manager, Request $request, UserPasswordHasherInterface $hasher, EmailService $emailService): Response
     {
 
         // nouvel objet utilisateur
@@ -61,33 +62,22 @@ class SecurityController extends AbstractController
             }
 
             $send=true;
-            if ($this->getUser()->getEmail()==$user->getEmail()){
+            if ($this->getUser() && $this->getUser()->getEmail()==$user->getEmail()){
                 $send=false;
 
             }
 
 
-            $manager->persist($user);
-            $manager->flush();
+//            $manager->persist($user);
+//            $manager->flush();
             $userMail = $user->getEmail();
 
             // préparation de l'envoie de l'email avec les infos de l'objet user en utilisant un template
             // les configuration du mailer sont posées dans le .env à MAILER_DNS (on passe par un compte brevo anciennement sendinBlue)
             if ($send):
-            $email = (new TemplatedEmail())
-                ->from('cezdesaulle.evogue@gmail.com')
-                ->to($userMail)
-                //->cc('cc@example.com')
-                //->bcc('bcc@example.com')
-                //->replyTo('fabien@example.com')
-                //->priority(Email::PRIORITY_HIGH)
-                ->subject('Activer votre compte Wanted')
-                ->htmlTemplate('email/validateAccount.html.twig')
-                ->context([
-                    'user' => $user,
-                ]);
-            // $mailer->IsSMTP();
-            $mailer->send($email);
+                $emailService->sendEmail($userMail, 'Activez votre compte', '<p>Veuillez clicker sur le liens ci-dessous pour confirmer votre inscription</p><p>Si vous n\'êtes pas l\'origine de cette demande merci de ne pas prendre en considération cet email et nous excuser pour la gêne</p>','validate_account', 'Activer mon compte',$user, 'token', $this->getParameter('img_dir'));
+
+
             endif;
             // do anything else you need here, like send an email
             if (!$this->getUser()) {
@@ -173,7 +163,7 @@ class SecurityController extends AbstractController
     // fonction mot de passe oublié pour accéder
     // au formulaire de demande d'email et générer l'envoie à l'adresse mail saisie à la condition qu'un utilisateur ait un compte à cet email
     #[Route('/reset/password', name: "reset_password")]
-    public function reset(Request $request, UserRepository $repo, MailerInterface $mailer, EntityManagerInterface $entityManager)
+    public function reset(Request $request, UserRepository $repo,  EntityManagerInterface $entityManager, EmailService $emailService)
     {
         // récupération de la saisie de l'email provenant du formulaire formulaire
         $email = $request->request->get('email', '');
@@ -191,16 +181,10 @@ class SecurityController extends AbstractController
                 $entityManager->flush();
 
                 // on prépare l'email
-                $email = (new TemplatedEmail())
-                    ->from('cezdesaulle.evogue@gmail.com')
-                    ->to($user->getEmail())
-                    ->subject('Reset mot de passe')
-                    ->htmlTemplate('email/resetPassword.html.twig')
-                    ->context([
-                        'user' => $user,
-                    ]);
-                // on envoie
-                $mailer->send($email);
+                $emailService->sendEmail($user->getEmail(), 'Mot de passe perdu?', '<p>Veuillez clicker sur le liens ci-dessous pour Réinitialiser votre mot de passe</p><p>Si vous n\'êtes pas l\'origine de cette demande merci de ne pas prendre en considération cet email et nous excuser pour la gêne</p>','new_password', 'Réinitialiser le mot de passe',$user, 'token', $this->getParameter('img_dir'));
+
+
+
                 $this->addFlash('success', "un email de reset vous a été envoyé");
 
                 return $this->redirectToRoute('home');

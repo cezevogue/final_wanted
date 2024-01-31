@@ -10,6 +10,7 @@
             background-color: #f3f3f3;
             font-family: Helvetica, Arial, sans-serif;
         }
+
         h1 {
             border-radius: 5px;
             border: 2px solid #2671a3;
@@ -18,35 +19,43 @@
             padding: 30px 0 50px 0;
             font-weight: normal;
         }
+
         hr {
             border: none;
             border-top: 3px solid #264459;
             margin: 20px;
         }
+
         .container {
             background-color: #fefefe;
             width: 580px;
             margin: 0 auto;
         }
+
         .bottom {
             border-radius: 5px;
-             border: 2px solid #45B7FF;
+            border: 2px solid #45B7FF;
             background-color: #000000;
         }
+
         .block {
             margin: 0;
             padding: 10px 20px 20px 20px;
+            text-align: center;
         }
+
         .logo {
             width: 100%;
         }
+
         .text-center {
             text-align: center;
         }
-        .bienvenue{
-            color:#fefefe;
+
+        .bienvenue {
+            color: #fefefe;
         }
-       
+
         .btn {
             display: inline-block;
             padding: 10px 20px;
@@ -63,25 +72,28 @@
 <body>
 <div class="body">
     <div class="container">
-        
+
         <div class="content">
-            <h1 class="text-center">Bonjour {{user.nickname}}!</h1>
+            <h1 class="text-center">Bonjour {{ user.nickname }}!</h1>
             <p class="block">
-                Bienvenue chez <strong>Wanted</strong>,
-               <p>Si vous n'êtes pas à l'origine de cette demande merci de l'ignoré et d'accepter nos excuses</p>
-                <p>
-                    Sinon merci de cliquer sur le lien ci-dessous afin d'autentifier votre compte. Merci!
-                </p>
+                <img src="cid:logo" width="200" alt="">
+                <h2>Bienvenue chez <strong>Wanted</strong>,</h2>
+                {{ content | raw }}
             </p>
             <p class="block text-center">
-                <a href="{{ url('validate_account', {"token": user.token}) }}" class="btn">Confirmer mon inscription!</a>
+
+                {% if paramName=='token' %}
+                    <a href="{{ url( route, {  'token': param}) }}" class="btn">{{ button }}</a>
+                {% else %}
+                    <a href="{{ url(route) }}" class="btn">{{ button }}</a>
+                {% endif %}
+
             </p>
-            
-           
-            
+
+
         </div>
         <div class="footer">
-           
+
             <p class="block bottom text-center bienvenue">
                 Envoyé par Wanted
             </p>

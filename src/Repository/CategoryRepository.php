@@ -21,6 +21,17 @@ class CategoryRepository extends ServiceEntityRepository
         parent::__construct($registry, Category::class);
     }
 
+    public function findBySearch($value)
+    {
+        return $this->createQueryBuilder('p')
+            ->where('p.title LIKE :val')
+            ->setParameter('val', '%' . $value . '%')
+            ->orderBy('p.title', 'ASC')
+            ->getQuery()
+            ->getResult()
+            ;
+    }
+
 //    /**
 //     * @return Category[] Returns an array of Category objects
 //     */

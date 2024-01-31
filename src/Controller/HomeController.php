@@ -6,6 +6,7 @@ use App\Entity\Product;
 use App\Entity\Rating;
 use App\Repository\CategoryRepository;
 use App\Repository\ProductRepository;
+use App\Repository\TagRepository;
 use App\Service\CartService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -13,6 +14,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Serializer\Encoder\JsonEncode;
 
 class HomeController extends AbstractController
 {
@@ -150,19 +152,47 @@ class HomeController extends AbstractController
 
 
     #[Route('/search', name: 'app_search', methods: 'GET')]
-    public function searchAction(Request $request, ProductRepository $repo)
+    public function searchAction(Request $request, ProductRepository $productRepository,CategoryRepository $categoryRepository,TagRepository $tagRepository)
     {
 
 
         $requestString = $request->get('q');
 
-        $products = $repo->findBySearch($requestString);
+        $productsFromProduct = $productRepository->findBySearch($requestString);
+        $productsFromTag = $tagRepository->findBySearch($requestString);
+        $productsFromCategory = $categoryRepository->findBySearch($requestString);
 
-        if (!$products) {
+        if (!$productsFromProduct && !$productsFromCategory && !$productsFromTag) {
             $result['entities']['error'] = "Aucun résultat";
         } else {
+           if ($productsFromProduct){
+               $result['entities']['Produits'] = $this->getRealEntities($productsFromProduct);
+               $result['entities']['Produits']['count']=count($productsFromProduct);
 
-            $result['entities'] = $this->getRealEntities($products);
+           }
+           if ($productsFromTag )
+           {
+               $result['entities']['Tags'] = $this->getRealEntities($productsFromTag);
+               foreach ($productsFromTag as $tag){
+
+                   $products=$productRepository->findBy(['tags'=>$tag]);
+                   $result['entities']['Tags']['count']+=count($products);
+
+               }
+
+
+           }
+
+           if ($productsFromCategory)
+           {
+               $result['entities']['Catégorie'] = $this->getRealEntities($productsFromCategory);
+               $products=$productRepository->findBy(['category'=>$productsFromCategory]);
+               $result['entities']['Catégorie']['count']=count($products);
+
+           }
+
+
+
         }
 
         return new Response(json_encode($result));
@@ -177,6 +207,37 @@ class HomeController extends AbstractController
 
         return $realEntities;
     }
+
+
+    #[Route('/search/{entity}/{id}', name: 'final_search')]
+    public function finalSearch(Request $request, ProductRepository $productRepository,CategoryRepository $categoryRepository,TagRepository $tagRepository, $entity, $id)
+    {
+        if ($entity=='Produits'){
+            $products=$productRepository->findBy(['id'=>$id]);
+           $count= count($products);
+        }
+
+        if ($entity=='Catégorie'){
+            $category=$categoryRepository->find($id);
+            $products=$productRepository->findBy(['category'=>$category]);
+            $count= count($products);
+        }
+
+        if ($entity=='Tags'){
+            $tag=$tagRepository->find($id);
+            $products=$productRepository->findBy(['tags'=>$tag]);
+            $count= count($products);
+        }
+
+
+        return $this->render('home/display_products.html.twig', [
+            'products'=>$products,
+            'count'=>$count,
+            'type'=>$entity
+        ]);
+
+    }
+
 
 
 

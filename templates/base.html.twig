@@ -141,7 +141,7 @@ let input=document.getElementById("search");
 
                     if (value.length >= minlength ) {
                         if (searchRequest != null)  searchRequest.abort();
-                        console.log( value)
+                       // console.log( value)
                         searchRequest = $.ajax({
                             type: "get",
                             url: "/search",
@@ -149,26 +149,58 @@ let input=document.getElementById("search");
                                 'q' : value
                             },
                             dataType: "json",
-                            success: function(msg){
+                            success: function(datas){
 
                                 if (value==$(that).val()) {
-                                    $.each(msg, function(key, arr) {
-                                        let i = 0
-                                        $.each(arr, function(id, value) {
+                                    $.each(datas, function(key, arr) {
+
+
+                                        $.each(arr, function(entity, result) {
+                                          //  console.log(result);
                                             if (key == 'entities') {
 
                                                 //création des <li> de suggestion
+                                                let count=0;
+                                                if (result['count'] ){
+                                                    count=result['count']
 
-                                                if (id != 'error') {
+                                                }
+                                                if (entity != 'error') {
+                                                       $.each(result, function (id, title){
+                                                        //   console.log(title);
+
+                                                           console.log(count);
+                                                        //console.log(id,title)
+                                                           if (id!=='count' )
+                                                           {
+                                                               let route="{{ path('final_search', { entity: 'entity', id:'id'}) }}";
+                                                               route=route.replace('entity', entity);
+                                                               route=route.replace('id', id);
+                                                             if (entity==='Produits'){
+                                                                 entitySelector.append('<li class="list-group-item result_bar"><span  class="value bg-secondary text-decoration-none text-dark" >'+count+' résultats, Dans '+entity+'</span></li>');
+
+
+                                                             }
+
+
+                                                             {
+                                                                 entitySelector.append('<li class="list-group-item result_bar"><a href="'+route+'" class="value text-decoration-none text-dark" id="'+entity+'-'+id+'" >'+title+', Dans '+entity+' ('+count+' produits)</a></li>');
+
+
+                                                             }
 
 
 
+                                                           }
 
-                                                        entitySelector.append('<li class="list-group-item result_bar" id="es'+id+'"><span class="value">'+value+'</span></li>');
-                                                        i++
+
+                                                       })
+
+
+
 
                                                 } else {
-                                                    entitySelector.append('<li class="errorLi list-group-item result_bar">'+value+'</li>');
+                                                    entitySelector.append('<li class="errorLi list-group-item result_bar">'+result+'</li>');
                                                 }
                                             }
                                         });
@@ -196,13 +228,26 @@ let input=document.getElementById("search");
 
 
                                 //Event click remplisage de la page
-                                $(".result_bar").on('click', function(){
-
-                                    if(!$(this).hasClass('errorLi')){
+                                // $("#entitiesNav").on('click', showProducts);
 
 
-                                    }
-                                })
+                                // function showProducts(e)
+                                // {
+                                //     $.ajax({
+                                //         type: "GET",
+                                //         url: '/finalSearch',
+                                //         data: { 'data':e.target.id},
+                                //         dataType: "json",
+                                //         success: function (result) {
+                                //             console.log(result)
+                                //         }
+                                //
+                                //
+                                //
+                                //     })
+                                //
+                                //
+                                // }
 
                                 //Event sur la touche entrée pour générer le même résultat qu'au click
 
