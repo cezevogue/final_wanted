@@ -22,8 +22,12 @@ class HomeController extends AbstractController
     // page d'accueil
     #[Route('/', name: 'home')]
     #[Route('/filter', name: 'filter')]
-    public function home(ProductRepository $repository, CategoryRepository $categoryRepository,Request $request): Response
+    public function home(TagRepository $tagRepository,ProductRepository $repository, CategoryRepository $categoryRepository,Request $request): Response
     {
+
+
+
+
         // renvoie la liste des products avec la possibilité de filtrer, de voir le détail et de l'ajouter au panier
 
         // récupération de tout les products
@@ -161,7 +165,7 @@ class HomeController extends AbstractController
         $productsFromProduct = $productRepository->findBySearch($requestString);
         $productsFromTag = $tagRepository->findBySearch($requestString);
         $productsFromCategory = $categoryRepository->findBySearch($requestString);
-
+        $result['search']=$requestString;
         if (!$productsFromProduct && !$productsFromCategory && !$productsFromTag) {
             $result['entities']['error'] = "Aucun résultat";
         } else {
@@ -173,13 +177,15 @@ class HomeController extends AbstractController
            if ($productsFromTag )
            {
                $result['entities']['Tags'] = $this->getRealEntities($productsFromTag);
+               $result['entities']['Tags']['count']=0;
                foreach ($productsFromTag as $tag){
 
-                   $products=$productRepository->findBy(['tags'=>$tag]);
+                   $products=$tag->getProducts();
                    $result['entities']['Tags']['count']+=count($products);
 
                }
 
+              // $result['entities']['Tags']['count']=10;
 
            }
 
@@ -213,7 +219,16 @@ class HomeController extends AbstractController
     public function finalSearch(Request $request, ProductRepository $productRepository,CategoryRepository $categoryRepository,TagRepository $tagRepository, $entity, $id)
     {
         if ($entity=='Produits'){
-            $products=$productRepository->findBy(['id'=>$id]);
+
+
+          if (!is_numeric($id)){
+
+              $products=$productRepository->findBySearch($id);
+          }else{
+              $products=$productRepository->findBy(['id'=>$id]);
+
+          }
+
            $count= count($products);
         }
 
@@ -225,7 +240,7 @@ class HomeController extends AbstractController
 
         if ($entity=='Tags'){
             $tag=$tagRepository->find($id);
-            $products=$productRepository->findBy(['tags'=>$tag]);
+            $products=$tag->getProducts();
             $count= count($products);
         }
 

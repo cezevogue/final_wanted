@@ -32,6 +32,17 @@ class ProductRepository extends ServiceEntityRepository
             ;
     }
 
+    public function findByTag($tag)
+    {
+        return $this->createQueryBuilder('p')
+            ->where(':tag MEMBER OF p.tags')
+            ->setParameter('tag' , $tag)
+            ->getQuery()
+            ->getResult()
+            ;
+
+    }
+
     public function findByPriceCategory($value, $category)
     {
         return $this->createQueryBuilder('a')
