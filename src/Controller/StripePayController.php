@@ -46,7 +46,7 @@ class StripePayController extends AbstractController
 
 
         // authentification avec la clé API
-        Stripe::setApiKey('sk_test_51NwOTlJ2Zd0dLxMHVyJSgNydBGye36Q96U200SAMIOxPBtTlK3UopVhKAsKHJrNFovwXw6Za2Qb4b4zq9x5NymCt00mw0P8R3y');
+        Stripe::setApiKey('xxx');
         // création de la session de paiement à transmettre au template de stripe avec définition des url de success ou d'echec
         $session = Session::create([
 //                 'success_url'=>'https://www.lock.cezdigit.com/commande/success',
